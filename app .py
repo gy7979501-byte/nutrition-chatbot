@@ -1,22 +1,15 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 
 # 1. عنوان الصفحة
 st.title("🥗 مساعد الصحة والتغذية الذكي")
 st.write("أهلاً بك! أنا مساعدك الشخصي للأنظمة الغذائية والحياة الصحية.")
 
-# 2. إعداد مفتاح الـ API
-API_KEY = "حAQ.Ab8RN6LNj5e50wiRNzuFtcPQYbL1utBKlpyAEErIS5sZlRvcCw"
-genai.configure(api_key=API_KEY)
+# 2. مفتاح الـ API
+API_KEY = "AQ.Ab8RN6LNj5e50wiRNzuFtcPQYbL1utBKlpyAEErIS5sZlRvcCwا"
+client = genai.Client(api_key=API_KEY)
 
-# 3. إعداد الموديل
-system_prompt = "أنت مساعد ذكي متخصص في الصحة والتغذية فقط. قدّم نصائح غذائية وحساب سعرات بلطف وبساطة. إذا سئلت في مجال آخر اعتذر بلطف."
-model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",
-    system_instruction=system_prompt
-)
-
-# 4. إدارة ذاكرة الشات
+# 3. إدارة ذاكرة الشات
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {
@@ -30,23 +23,26 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 5. استقبال وتجهيز الردود
+# 4. استقبال وتجهيز الردود
 if user_input := st.chat_input("اكتب سؤالك عن التغذية أو الأكل..."):
-    # إضافة سؤال المستخدم للذاكرة
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.markdown(user_input)
 
-    # توليد وعرض رد البوت مباشرة مع تأثير الكتابة
+    # تجهيز النص بالتعليمات بأسلوب آمن تماماً للترميز
+    prompt = f"أنت مساعد متخصص في التغذية والصحة فقط. أجب بأسلوب بسيط ولطيف على السؤال التالي: {user_input}"
+
     with st.chat_message("assistant"):
         with st.spinner("جاري التفكير..."):
             try:
-                response = model.generate_content(user_input)
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=prompt
+                )
                 bot_reply = response.text
             except Exception as e:
                 bot_reply = f"حدث خطأ أثناء الاتصال بالخدمة: {e}"
             st.markdown(bot_reply)
 
-    # حفظ الرد في الذاكرة
     st.session_state.messages.append({"role": "assistant", "content": bot_reply})
  
