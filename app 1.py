@@ -1,0 +1,49 @@
+import streamlit as st
+from google import genai
+
+# 1. عنوان الصفحة
+st.title("🥗 مساعد الصحة والتغذية الذكي")
+st.write("أهلاً بك! أنا مساعدك الشخصي للأنظمة الغذائية والحياة الصحية.")
+
+# 2. وضع مفتاح الـ API الخاص بكِ
+API_KEY = "حطي_المفتاح_بتاعك_هنا"
+
+client = genai.Client(api_key=API_KEY)
+
+# 3. تعليمات النظام (System Prompt)
+system_prompt = """
+أنت مساعد ذكي متخصص في الصحة والتغذية فقط.
+وظيفتك: تقديم نصائح تغذية، حساب السعرات الحرارية، واقتراح وجبات صحية.
+إذا سألك المستخدم في أي مجال آخر غير الصحة والتغذية، اعتذر منه بلطف وقل له أنك متخصص في التغذية فقط.
+"""
+
+# 4. إدارة ذاكرة الشات مع إضافة رسالة ترحيب أولية
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {
+            "role": "assistant",
+            "content": "أهلاً بك! 👋 أنا مساعدك الذكي للتغذية والصحة. كيف يمكنني مساعدتك اليوم في تحسين نظامك الغذائي أو حساب سعراتك؟"
+        }
+    ]
+
+# عرض كافة الرسائل الموجودة في الذاكرة
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# 5. استقبال وتجهيز الردود
+if user_input := st.chat_input("اكتب سؤالك عن التغذية أو الأكل..."):
+    st.session_state.messages.append({"role": "user", "content": user_input})
+    with st.chat_message("user"):
+        st.markdown(user_input)
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=user_input,
+        config={"system_instruction": system_prompt}
+    )
+
+    bot_reply = response.text
+    with st.chat_message("assistant"):
+        st.markdown(bot_reply)
+    st.session_state.messages.append({"role": "assistant", "content": bot_reply})
