@@ -1,5 +1,5 @@
 import streamlit as st
-from google import genai
+import requests
 
 # 1. عنوان الصفحة
 st.title("🥗 مساعد الصحة والتغذية الذكي")
@@ -7,7 +7,6 @@ st.write("أهلاً بك! أنا مساعدك الشخصي للأنظمة ال�
 
 # 2. مفتاح الـ API
 API_KEY = "AQ.Ab8RN6LNj5e50wiRNzuFtcPQYbL1utBKlpyAEErIS5sZlRvcCwا"
-client = genai.Client(api_key=API_KEY)
 
 # 3. إدارة ذاكرة الشات
 if "messages" not in st.session_state:
@@ -29,19 +28,31 @@ if user_input := st.chat_input("اكتب سؤالك عن التغذية أو ا�
     with st.chat_message("user"):
         st.markdown(user_input)
 
-    # تجهيز النص بالتعليمات بأسلوب آمن تماماً للترميز
-    prompt = f"أنت مساعد متخصص في التغذية والصحة فقط. أجب بأسلوب بسيط ولطيف على السؤال التالي: {user_input}"
-
     with st.chat_message("assistant"):
         with st.spinner("جاري التفكير..."):
             try:
-                response = client.models.generate_content(
-                    model="gemini-2.5-flash",
-                    contents=prompt
-                )
-                bot_reply = response.text
+                # إرسال الطلب المباشر عبر REST API لتفادي أي أخطاء ترميز
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={API_KEY}"
+                
+                payload = {
+                    "contents": [{
+                        "parts": [{
+                            "text": f"أنت مساعد متخصص في الصحة والتغذية فقط. أجب بلطف وبساطة على السؤال التالي: {user_input}"
+                        }]
+                    }]
+                }
+                
+                response = requests.post(url, json=payload)
+                result = response.json()
+                
+                if "candidates" in result:
+                    bot_reply = result["candidates"][0]["content"]["parts"][0]["text"]
+                else:
+                    bot_reply = f"حدث خطأ في الاستجابة: {result.get('error', {}).get('message', 'خطأ غير معروف')}"
+                    
             except Exception as e:
                 bot_reply = f"حدث خطأ أثناء الاتصال بالخدمة: {e}"
+
             st.markdown(bot_reply)
 
     st.session_state.messages.append({"role": "assistant", "content": bot_reply})
