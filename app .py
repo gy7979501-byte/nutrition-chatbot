@@ -1,23 +1,20 @@
 import streamlit as st
 from google import genai
+from google.genai import types
 
 # 1. عنوان الصفحة
 st.title("🥗 مساعد الصحة والتغذية الذكي")
 st.write("أهلاً بك! أنا مساعدك الشخصي للأنظمة الغذائية والحياة الصحية.")
 
-# 2. وضع مفتاح الـ API الخاص بكِ
-API_KEY = "حطي_المفتاح_بتاعك_هنا"
+# 2. وضع مفتاح الـ API
+API_KEY = "AQ.Ab8RN6KR6Xs1scS0daOU6Vbf0NjkpyvEb31BY_gQjmK82CWFEA"
 
 client = genai.Client(api_key=API_KEY)
 
 # 3. تعليمات النظام (System Prompt)
-system_prompt = """
-أنت مساعد ذكي متخصص في الصحة والتغذية فقط.
-وظيفتك: تقديم نصائح تغذية، حساب السعرات الحرارية، واقتراح وجبات صحية.
-إذا سألك المستخدم في أي مجال آخر غير الصحة والتغذية، اعتذر منه بلطف وقل له أنك متخصص في التغذية فقط.
-"""
+system_prompt = "أنت مساعد ذكي متخصص في الصحة والتغذية فقط. قدّم نصائح غذائية وحساب سعرات بلطف وبساطة. إذا سئلت في مجال آخر اعتذر بلطف."
 
-# 4. إدارة ذاكرة الشات مع إضافة رسالة ترحيب أولية
+# 4. إدارة ذاكرة الشات مع رسالة ترحيب
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {
@@ -26,7 +23,7 @@ if "messages" not in st.session_state:
         }
     ]
 
-# عرض كافة الرسائل الموجودة في الذاكرة
+# عرض الرسائل القديمة
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -37,10 +34,15 @@ if user_input := st.chat_input("اكتب سؤالك عن التغذية أو ا�
     with st.chat_message("user"):
         st.markdown(user_input)
 
+    # إرسال الطلب مع تكوين النظام بشكل آمن مع اللغات العربية
+    config = types.GenerateContentConfig(
+        system_instruction=system_prompt
+    )
+
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=user_input,
-        config={"system_instruction": system_prompt}
+        config=config
     )
 
     bot_reply = response.text
