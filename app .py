@@ -31,24 +31,26 @@ if user_input := st.chat_input("اكتب سؤالك عن التغذية أو ا�
     with st.chat_message("assistant"):
         with st.spinner("جاري التفكير..."):
             try:
-                # إرسال الطلب المباشر عبر REST API لتفادي أي أخطاء ترميز
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={API_KEY}"
+                # استخدام رابط الموديل المباشر والآمن تماماً للمفاتيح العادية
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
                 
+                headers = {"Content-Type": "application/json"}
                 payload = {
                     "contents": [{
                         "parts": [{
-                            "text": f"أنت مساعد متخصص في الصحة والتغذية فقط. أجب بلطف وبساطة على السؤال التالي: {user_input}"
+                            "text": f"أنت مساعد متخصص في الصحة والتغذية فقط. أجب بأسلوب بسيط ولطيف باللغة العربية على السؤال التالي: {user_input}"
                         }]
                     }]
                 }
                 
-                response = requests.post(url, json=payload)
+                response = requests.post(url, headers=headers, json=payload)
                 result = response.json()
                 
                 if "candidates" in result:
                     bot_reply = result["candidates"][0]["content"]["parts"][0]["text"]
                 else:
-                    bot_reply = f"حدث خطأ في الاستجابة: {result.get('error', {}).get('message', 'خطأ غير معروف')}"
+                    error_msg = result.get('error', {}).get('message', 'خطأ غير معروف')
+                    bot_reply = f"حدث خطأ في الاستجابة: {error_msg}"
                     
             except Exception as e:
                 bot_reply = f"حدث خطأ أثناء الاتصال بالخدمة: {e}"
