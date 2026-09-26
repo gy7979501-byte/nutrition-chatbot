@@ -7,7 +7,7 @@ st.title("🥗 مساعد الصحة والتغذية الذكي")
 st.write("أهلاً بك! أنا مساعدك الشخصي للأنظمة الغذائية والحياة الصحية.")
 
 # 2. مفتاح الـ API
-API_KEY =API_KEY = "AQ.Ab8RN6IhcsbCnhhxDKVzCxiPOVZcreJVJCZPNoG3ANCfb996lQ"
+API_KEY = "AQ.Ab8RN6LNj5e50wiRNzuFtcPQYbL1utBKlpyAEErIS5sZlRvcCwا"
 client = genai.Client(api_key=API_KEY)
 
 # 3. تعليمات النظام
@@ -22,7 +22,7 @@ if "messages" not in st.session_state:
         }
     ]
 
-# عرض الرسائل
+# عرض الرسائل القديمة
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -35,7 +35,7 @@ if user_input := st.chat_input("اكتب سؤالك عن التغذية أو ا�
 
     try:
         response = client.models.generate_content(
-            model="gemini-1.5-flash",
+            model="gemini-2.5-flash",
             contents=user_input,
             config=types.GenerateContentConfig(
                 system_instruction=system_prompt
