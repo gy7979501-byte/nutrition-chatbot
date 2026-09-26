@@ -6,24 +6,25 @@ from google.genai import types
 st.title("🥗 مساعد الصحة والتغذية الذكي")
 st.write("أهلاً بك! أنا مساعدك الشخصي للأنظمة الغذائية والحياة الصحية.")
 
-# 2. وضع مفتاح الـ API
-API_KEY = "AQ.Ab8RN6KR6Xs1scS0daOU6Vbf0NjkpyvEb31BY_gQjmK82CWFEA"
+# 2. مفتاح الـ API
+API_KEY = "API_KEY = "AQ.Ab8RN6KR6Xs1scS0daOU6Vbf0NjkpyvEb31BY_gQjmK82CWFEA"
+"
 
 client = genai.Client(api_key=API_KEY)
 
-# 3. تعليمات النظام (System Prompt)
+# 3. تعليمات النظام
 system_prompt = "أنت مساعد ذكي متخصص في الصحة والتغذية فقط. قدّم نصائح غذائية وحساب سعرات بلطف وبساطة. إذا سئلت في مجال آخر اعتذر بلطف."
 
-# 4. إدارة ذاكرة الشات مع رسالة ترحيب
+# 4. إدارة ذاكرة الشات
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {
             "role": "assistant",
-            "content": "أهلاً بك! 👋 أنا مساعدك الذكي للتغذية والصحة. كيف يمكنني مساعدتك اليوم في تحسين نظامك الغذائي أو حساب سعراتك؟"
+            "content": "أهلاً بك! 👋 أنا مساعدك الذكي للتغذية والصحة. كيف يمكنني مساعدتك اليوم؟"
         }
     ]
 
-# عرض الرسائل القديمة
+# عرض الرسائل
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -34,18 +35,18 @@ if user_input := st.chat_input("اكتب سؤالك عن التغذية أو ا�
     with st.chat_message("user"):
         st.markdown(user_input)
 
-    # إرسال الطلب مع تكوين النظام بشكل آمن مع اللغات العربية
-    config = types.GenerateContentConfig(
-        system_instruction=system_prompt
-    )
+    try:
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=user_input,
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt
+            )
+        )
+        bot_reply = response.text
+    except Exception as e:
+        bot_reply = f"حدث خطأ أثناء الاتصال بالخدمة: {e}"
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=user_input,
-        config=config
-    )
-
-    bot_reply = response.text
     with st.chat_message("assistant"):
         st.markdown(bot_reply)
     st.session_state.messages.append({"role": "assistant", "content": bot_reply})
