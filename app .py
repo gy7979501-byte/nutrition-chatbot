@@ -1,4 +1,15 @@
+import os
+import sys
 import streamlit as st
+
+# ضبط الترميز ليدعم اللغة العربية بدلاً من ASCII
+os.environ["PYTHONIOENCODING"] = "utf-8"
+if sys.stdout.encoding != 'utf-8':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+
 from google import genai
 from google.genai import types
 
@@ -34,9 +45,10 @@ if user_input := st.chat_input("اكتب سؤالك عن التغذية أو ا�
         st.markdown(user_input)
 
     try:
+        # إرسال النص مع التأكد من الترميز الصحيح
         response = client.models.generate_content(
             model="gemini-2.5-flash",
-            contents=user_input,
+            contents=user_input.encode("utf-8").decode("utf-8"),
             config=types.GenerateContentConfig(
                 system_instruction=system_prompt
             )
