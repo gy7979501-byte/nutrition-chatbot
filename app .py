@@ -7,7 +7,7 @@ st.title("🥗 مساعد الصحة والتغذية الذكي")
 st.write("أهلاً بك! أنا مساعدك الشخصي للأنظمة الغذائية والحياة الصحية.")
 
 # 2. مفتاح الـ API
-API_KEY =API_KEY = "AQ.Ab8RN6Io0mQ3CAxPAU2fNFmd5limUlQJCA4FsusKmrK-GjTD9Q"
+API_KEY =API_KEY = "AQ.Ab8RN6IhcsbCnhhxDKVzCxiPOVZcreJVJCZPNoG3ANCfb996lQ"
 client = genai.Client(api_key=API_KEY)
 
 # 3. تعليمات النظام
